@@ -26,7 +26,7 @@ impl RedisSettings {
 
 pub fn get_config() -> Result<Settings, config::ConfigError> {
     let settings = config::Config::builder()
-        .add_source(config::File::new("config/configuration.yaml", config::FileFormat::Yaml))
+        .add_source(config::File::new("/etc/blitz-login/configuration.yaml", config::FileFormat::Yaml))
         .build()?;
     settings.try_deserialize::<Settings>()
 }
