@@ -1,14 +1,22 @@
 use std::net::TcpListener;
 
 use blitz_login::startup::run;
+use blitz_login::types::Login;
 
 #[tokio::test]
 async fn health_check_works() {
     let address = spawn().await;
+    let login = Login {
+        username: "foo".to_string(),
+        password: "bar".to_string(),
+    };
+    let login = serde_json::to_string(&login).expect("Failed to serialize login.");
 
     let client = reqwest::Client::new();
     let response = client
-        .get(&format!("{}/health_check", &address))
+        .post(&format!("{}/health_check", &address))
+        .header("Content-Type", "application/json")
+        .body(login)
         .send()
         .await
         .expect("Failed to execute request.");

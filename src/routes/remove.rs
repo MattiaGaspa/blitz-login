@@ -1,5 +1,7 @@
-use actix_web::HttpResponse;
+use actix_web::{web, HttpResponse};
 
-pub async fn remove() -> HttpResponse {
+use crate::types::Login;
+
+pub async fn remove(login: web::Json<Login>) -> HttpResponse {
     HttpResponse::Ok().finish()
 }

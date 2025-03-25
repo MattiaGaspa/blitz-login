@@ -10,5 +10,7 @@ async fn main() -> Result<(), std::io::Error> {
         format!("{}:{}", config.server.host, config.server.port)
     )
         .expect("Failed to bind TCP port.");
-    run(listener)?.await
+    let redis = redis::Client::open(config.redis.connection_string())
+        .expect("Failed to open redis connection.");
+    run(listener, redis)?.await
 }
