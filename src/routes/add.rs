@@ -1,15 +1,30 @@
 use actix_web::{web, HttpResponse};
 use redis::Client;
-use crate::types::Login;
 
-pub async fn add(login: web::Json<Login>, mut redis: web::Data<Client>) -> HttpResponse {
-    let mut con = redis.get_ref()
-        .get_connection()
-        .expect("failed to get redis connection");
-    let _: () = redis::cmd("SET")
-        .arg("foo")
-        .arg("bar")
-        .query(&mut con)
-        .expect("failed to execute SET for 'foo'");
-    HttpResponse::Ok().finish()
+use crate::types::Credentials;
+
+pub async fn add(login: web::Json<Credentials>, redis: web::Data<Client>) -> HttpResponse {
+    let mut con = match redis.get_ref()
+        .get_connection() {
+        Ok(con) => con,
+        Err(e) => {
+            log::error!("Failed to get redis connection: {}", e);
+            return HttpResponse::InternalServerError().finish();
+        }
+    };
+    let hashed_credentials = login.hash();
+
+    match redis::cmd("SET")
+        .arg(&hashed_credentials.username)
+        .arg(&hashed_credentials.password)
+        .exec(&mut con) {
+        Ok(_) => {
+            log::info!("Successfully added user {}.", hashed_credentials.username);
+            HttpResponse::Ok().finish()
+        },
+        Err(e) => {
+            log::error!("Failed to add user {}: {}", hashed_credentials.username, e);
+            HttpResponse::InternalServerError().finish()
+        }
+    }
 }

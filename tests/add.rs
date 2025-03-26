@@ -1,12 +1,12 @@
 use std::net::TcpListener;
 
-use blitz_login::startup::run;
-use blitz_login::types::Login;
+use blitz_login::utility::run;
+use blitz_login::types::Credentials;
 
 #[tokio::test]
 async fn health_check_works() {
     let address = spawn().await;
-    let login = Login {
+    let login = Credentials {
         username: "foo".to_string(),
         password: "bar".to_string(),
     };

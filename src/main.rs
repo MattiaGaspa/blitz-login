@@ -1,5 +1,5 @@
 use std::net::TcpListener;
-use blitz_login::startup::run;
+use blitz_login::utility::run;
 use blitz_login::configuration::get_config;
 
 #[tokio::main]

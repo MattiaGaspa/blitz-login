@@ -1,9 +1,9 @@
 use actix_web::{web, HttpResponse};
 use redis::Client;
 
-use crate::types::ChangePassword;
+use crate::types::Credentials;
 
-pub async fn edit(login: web::Json<ChangePassword>, redis: web::Data<Client>) -> HttpResponse {
+pub async fn login(login: web::Json<Credentials>, redis: web::Data<Client>) -> HttpResponse {
     let mut con = match redis.get_ref()
         .get_connection() {
         Ok(con) => con,
@@ -24,20 +24,8 @@ pub async fn edit(login: web::Json<ChangePassword>, redis: web::Data<Client>) ->
         }
     };
 
-    if expected_password_hash == hashed_credentials.old_password {
-        match redis::cmd("SET")
-            .arg(&hashed_credentials.username)
-            .arg(&hashed_credentials.new_password)
-            .exec(&mut con) {
-            Ok(_) => {
-                log::info!("Successfully updated user {}'s password.", hashed_credentials.username);
-                HttpResponse::Ok().finish()
-            },
-            Err(e) => {
-                log::error!("Failed to update user {}'s password: {}", hashed_credentials.username, e);
-                HttpResponse::InternalServerError().finish()
-            }
-        }
+    if expected_password_hash == hashed_credentials.password {
+        HttpResponse::Ok().finish()
     }
     else {
         HttpResponse::Unauthorized().finish()

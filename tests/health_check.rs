@@ -1,6 +1,6 @@
 use std::net::TcpListener;
 
-use blitz_login::startup::run;
+use blitz_login::utility::run;
 
 #[tokio::test]
 async fn health_check_works() {
