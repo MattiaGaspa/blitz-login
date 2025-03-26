@@ -14,7 +14,6 @@ pub struct ChangePassword {
     pub new_password: String,
 }
 
-
 pub fn hash(text: &String) -> String {
     let salt = SaltString::generate(&mut OsRng);
     Argon2::default()
