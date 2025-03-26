@@ -14,7 +14,7 @@ async fn health_check_works() {
 
     let client = reqwest::Client::new();
     let response = client
-        .post(&format!("{}/health_check", &address))
+        .post(&format!("{}/add", &address))
         .header("Content-Type", "application/json")
         .body(login)
         .send()

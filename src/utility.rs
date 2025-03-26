@@ -15,10 +15,10 @@ pub fn run(listener: TcpListener, redis: Client) -> Result<Server, std::io::Erro
     let server = HttpServer::new(move || {
         App::new()
             .route("/add", web::post().to(add))
-            .route("/edit", web::post().to(remove))
+            .route("/edit", web::post().to(edit))
             .route("/health_check", web::get().to(health_check))
             .route("/login", web::post().to(login))
-            .route("/remove", web::post().to(edit))
+            .route("/remove", web::post().to(remove))
             .wrap(Logger::new("%a %{User-Agent}i"))
             .app_data(redis.clone())
     })

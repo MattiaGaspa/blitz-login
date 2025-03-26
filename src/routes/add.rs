@@ -1,7 +1,7 @@
 use actix_web::{web, HttpResponse};
 use redis::Client;
 
-use crate::types::Credentials;
+use crate::types::{hash, Credentials};
 
 pub async fn add(login: web::Json<Credentials>, redis: web::Data<Client>) -> HttpResponse {
     let mut con = match redis.get_ref()
@@ -12,18 +12,17 @@ pub async fn add(login: web::Json<Credentials>, redis: web::Data<Client>) -> Htt
             return HttpResponse::InternalServerError().finish();
         }
     };
-    let hashed_credentials = login.hash();
 
     match redis::cmd("SET")
-        .arg(&hashed_credentials.username)
-        .arg(&hashed_credentials.password)
+        .arg(&login.username)
+        .arg(hash(&login.password))
         .exec(&mut con) {
         Ok(_) => {
-            log::info!("Successfully added user {}.", hashed_credentials.username);
+            log::info!("Successfully added user {}.", login.username);
             HttpResponse::Ok().finish()
         },
         Err(e) => {
-            log::error!("Failed to add user {}: {}", hashed_credentials.username, e);
+            log::error!("Failed to add user {}: {}", login.username, e);
             HttpResponse::InternalServerError().finish()
         }
     }

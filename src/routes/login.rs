@@ -1,4 +1,5 @@
 use actix_web::{web, HttpResponse};
+use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use redis::Client;
 
 use crate::types::Credentials;
@@ -12,7 +13,6 @@ pub async fn login(login: web::Json<Credentials>, redis: web::Data<Client>) -> H
             return HttpResponse::InternalServerError().finish();
         }
     };
-    let hashed_credentials = login.hash();
 
     let expected_password_hash: String = match redis::cmd("GET")
         .arg(&login.username)
@@ -23,11 +23,20 @@ pub async fn login(login: web::Json<Credentials>, redis: web::Data<Client>) -> H
             return HttpResponse::InternalServerError().finish();
         }
     };
-
-    if expected_password_hash == hashed_credentials.password {
-        HttpResponse::Ok().finish()
-    }
-    else {
-        HttpResponse::Unauthorized().finish()
+    let expected_password_hash = PasswordHash::new(&expected_password_hash)
+        .expect("Invalid password hash");
+    match Argon2::default()
+        .verify_password(
+            login.password.as_bytes(),
+            &expected_password_hash,
+        ) {
+        Ok(_) => {
+            log::info!("User {} has logged in.", login.username);
+            HttpResponse::Ok().finish()
+        },
+        Err(_) => {
+            log::warn!("Failed login attempt for {}.", login.username);
+            HttpResponse::Unauthorized().finish()
+        }
     }
 }
