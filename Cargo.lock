@@ -478,11 +478,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ba5a308b75df32fe02788e748662718f03fde005016435c444eea572398219fd"
 dependencies = [
  "bytes",
- "futures-core",
  "memchr",
- "pin-project-lite",
- "tokio",
- "tokio-util",
 ]
 
 [[package]]
@@ -808,11 +804,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9fa08315bb612088cc391249efdc3bc77536f16c91f6cf495e6fbe85b20a4a81"
 dependencies = [
  "futures-core",
- "futures-sink",
  "futures-task",
  "pin-project-lite",
  "pin-utils",
- "slab",
 ]
 
 [[package]]
@@ -1700,20 +1694,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b110459d6e323b7cda23980c46c77157601199c9da6241552b284cd565a7a133"
 dependencies = [
  "arc-swap",
- "bytes",
  "combine",
- "futures-util",
  "itoa",
  "num-bigint",
  "percent-encoding",
- "pin-project-lite",
  "ryu",
  "serde",
  "serde_json",
  "sha1_smol",
  "socket2",
- "tokio",
- "tokio-util",
  "url",
 ]
 

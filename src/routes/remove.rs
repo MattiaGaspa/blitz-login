@@ -23,14 +23,19 @@ pub async fn remove(login: web::Json<Credentials>, redis: web::Data<Client>) -> 
             return HttpResponse::InternalServerError().finish();
         }
     };
-    let expected_password_hash = PasswordHash::new(&expected_password_hash)
-        .expect("Invalid password hash");
-    match Argon2::default()
-        .verify_password(
-            login.password.as_bytes(),
-            &expected_password_hash,
-        ) {
-        Ok(_) => {
+
+    let password = login.password.clone();
+    match tokio::task::spawn_blocking(move || {
+        let expected_password_hash = PasswordHash::new(&expected_password_hash)
+            .expect("Invalid password hash");
+
+        Argon2::default()
+            .verify_password(
+                password.as_bytes(),
+                &expected_password_hash,
+            )
+    }).await {
+        Ok(Ok(_)) => {
             match redis::cmd("DEL")
                 .arg(&login.username)
                 .exec(&mut con) {
@@ -44,9 +49,13 @@ pub async fn remove(login: web::Json<Credentials>, redis: web::Data<Client>) -> 
                 }
             }
         },
-        Err(_) => {
+        Ok(Err(_)) => {
             log::warn!("Attempt to remove user {}.", login.username);
             HttpResponse::Unauthorized().finish()
+        },
+        Err(e) => {
+            log::error!("Failed to spawn blocking task: {}", e);
+            HttpResponse::InternalServerError().finish()
         }
     }
 }

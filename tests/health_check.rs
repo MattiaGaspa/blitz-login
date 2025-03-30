@@ -18,11 +18,13 @@ async fn health_check_works() {
 }
 
 async fn spawn() -> String {
+    let config = blitz_login::configuration::get_config()
+        .expect("Failed to read configuration.");
     let listener = TcpListener::bind("127.0.0.1:0")
         .expect("Failed to bind random port.");
     let port = listener.local_addr().unwrap().port();
 
-    let redis = redis::Client::open("redis://redis/")
+    let redis = redis::Client::open(config.redis.connection_string())
         .expect("Failed to open redis connection.");
     let server = run(listener, redis).expect("Failed to run server.");
     let _ = tokio::spawn(server);

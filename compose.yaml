@@ -7,5 +7,10 @@ services:
       - redis
   redis:
     image: "redis:alpine"
+    command: redis-server --appendonly yes
+    restart: always
     volumes:
-      - ./data:/data
+      - redis_data:/data
+
+volumes:
+  redis_data:
