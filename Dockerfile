@@ -4,7 +4,7 @@ COPY . .
 RUN cargo install --profile release --path .
 
 FROM debian:bookworm-slim
-RUN apt-get update && apt-get upgrade
+RUN apt-get update && apt-get upgrade -y
 RUN rm -rf /var/lib/apt/lists/*
 COPY --from=builder /usr/local/cargo/bin/blitz-login /usr/local/bin/blitz-login
 RUN mkdir -p /etc/blitz-login

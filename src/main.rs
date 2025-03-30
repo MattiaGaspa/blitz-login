@@ -10,6 +10,9 @@ async fn main() -> Result<(), std::io::Error> {
     )
         .expect("Failed to bind TCP port.");
     let redis = redis::Client::open(config.redis.connection_string())
+        .unwrap()
+        .get_multiplexed_async_connection()
+        .await
         .expect("Failed to open redis connection.");
     run(listener, redis)?.await
 }

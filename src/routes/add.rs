@@ -1,22 +1,16 @@
+use std::sync::Mutex;
 use actix_web::{web, HttpResponse};
-use redis::Client;
+use redis::aio::MultiplexedConnection;
 
 use crate::types::{hash, Credentials};
 
-pub async fn add(login: web::Json<Credentials>, redis: web::Data<Client>) -> HttpResponse {
-    let mut con = match redis.get_ref()
-        .get_connection() {
-        Ok(con) => con,
-        Err(e) => {
-            log::error!("Failed to get redis connection: {}", e);
-            return HttpResponse::InternalServerError().finish();
-        }
-    };
-
-    match redis::cmd("SET")
-        .arg(&login.username)
-        .arg(hash(&login.password))
-        .exec(&mut con) {
+pub async fn add(login: web::Json<Credentials>, redis: web::Data<Mutex<MultiplexedConnection>>) -> HttpResponse {
+    let mut redis = redis.lock().unwrap();
+    match redis.send_packed_command(
+        redis::cmd("SET")
+            .arg(&login.username)
+            .arg(hash(&login.password))
+    ).await {
         Ok(_) => {
             log::info!("Successfully added user {}.", login.username);
             HttpResponse::Ok().finish()

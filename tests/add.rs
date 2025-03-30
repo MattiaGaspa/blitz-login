@@ -4,7 +4,7 @@ use blitz_login::utility::run;
 use blitz_login::types::Credentials;
 
 #[tokio::test]
-async fn health_check_works() {
+async fn add_works() {
     let address = spawn().await;
     let login = Credentials {
         username: "foo".to_string(),
@@ -31,6 +31,9 @@ async fn spawn() -> String {
     let port = listener.local_addr().unwrap().port();
 
     let redis = redis::Client::open("redis://redis/")
+        .unwrap()
+        .get_multiplexed_async_connection()
+        .await
         .expect("Failed to open redis connection.");
     let server = run(listener, redis).expect("Failed to run server.");
     let _ = tokio::spawn(server);
