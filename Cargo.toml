@@ -13,7 +13,7 @@ name = "blitz-login"
 
 [dependencies]
 actix-web = "4.11.0"
-argon2 = { version = "0.6.0-pre.1", features = ["std"] }
+argon2 = { version = "0.6.0-rc.0", features = ["std"] }
 config = "0.15.11"
 env_logger = "0.11.8"
 log = "0.4.27"
